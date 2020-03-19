@@ -1,0 +1,35 @@
+{
+
+"images": [
+    "sprites.png"
+],
+
+"framerate": 30,
+"frames": [
+    [1, 1, 94, 37, 0, 0, 0],
+    [97, 1, 40, 16, 0, 0, 0],
+    [139, 1, 40, 16, 0, 0, 0],
+    [181, 1, 76, 16, 0, 0, 0],
+    [259, 1, 76, 16, 0, 0, 0],
+    [1, 40, 300, 300, 0, 0, 0],
+    [1, 342, 300, 300, 0, 0, 0],
+    [1, 644, 300, 300, 0, 0, 0]
+],
+
+"animations": {
+    "buttons/hotspot": { "frames": [0] },
+    "buttons/nextOver": { "frames": [1] },
+    "buttons/nextUp": { "frames": [2] },
+    "buttons/previousOver": { "frames": [3] },
+    "buttons/previousUp": { "frames": [4] },
+    "screens/content": { "frames": [5] },
+    "screens/end": { "frames": [6] },
+    "screens/intro": { "frames": [7] }
+},
+
+"texturepacker": [
+        "SmartUpdateHash: $TexturePacker:SmartUpdate:f823d75c320988281f3fdf70f353528e:501ee158958b7f330a4585d6631eaf8c:1eabdf11f75e3a4fe3147baf7b5be24b$",
+        "Created with TexturePacker (https://www.codeandweb.com/texturepacker) for EaselJS"
+]
+
+}

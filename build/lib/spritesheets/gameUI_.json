@@ -1,0 +1,35 @@
+{
+
+"images": [
+    "gameUI.png"
+],
+
+"framerate": 30,
+"frames": [
+    [1, 1, 600, 600, 0, 0, 0],
+    [603, 1, 224, 59, 0, 112, -8],
+    [1, 603, 226, 66, 0, 113, 0],
+    [229, 603, 236, 76, 0, 118, 2],
+    [467, 603, 32, 32, 0, 0, 0],
+    [501, 603, 480, 384, 0, 0, 0],
+    [983, 603, 30, 32, 0, -1, 0],
+    [1, 989, 256, 256, 0, 0, 0]
+],
+
+"animations": {
+    "Background": { "frames": [0] },
+    "Button Down": { "frames": [1] },
+    "Button Over": { "frames": [2] },
+    "Button Up": { "frames": [3] },
+    "currentScore": { "frames": [4] },
+    "gameOver": { "frames": [5] },
+    "hiScore": { "frames": [6] },
+    "howToPlay": { "frames": [7] }
+},
+
+"texturepacker": [
+        "SmartUpdateHash: $TexturePacker:SmartUpdate:63c11aa78b07a182d099f94a3b9c72e8:efba5cacbe3ee00141ba73d2d419573b:edd8cedcd3f20f497642ea2038967655$",
+        "Created with TexturePacker (https://www.codeandweb.com/texturepacker) for EaselJS"
+]
+
+}
