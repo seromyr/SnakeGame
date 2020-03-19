@@ -3,6 +3,8 @@ export const STAGE_WIDTH:number = 600;
 export const STAGE_HEIGHT:number = 600;
 export const BACKGROUND_COLOR:string = "#FFFFFF";
 export const FRAME_RATE:number = 30;
+export const GAMEPLAY_GRIDX: number = 17;
+export const GAMEPLAY_GRIDY: number = 15;
 export const SCREEN_TITLES:string[] = 
     [
         "SNAKE",
