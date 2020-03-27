@@ -6,10 +6,9 @@ export default class IntroScreen extends Screen {
 
     constructor(assetManager:AssetManager, stage:createjs.StageGL) {
         //this must be the 1st line in the constructor method
-        super(assetManager,stage, "intro");        
+        super(assetManager,stage, "intro");
+        super.addNextButton();
     }
-
-
 
     //override a method (METHOD OVERRIDING)
     public showMe():void{

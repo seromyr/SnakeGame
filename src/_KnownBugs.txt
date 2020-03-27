@@ -1,0 +1,3 @@
+Donut spawn inside the snake position
+Snake can move backward
+Cannot reset game

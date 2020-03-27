@@ -29,11 +29,11 @@ export default class Screen {
     private gridY:number[] = [];
     private currentGridX:number;
     private currentGridY:number;
-
+    
     //--------------------------------------- for the whole snake
-    private travelLog:number[][] = [[],[]];
+    private travelLog:number[][];
     private _isMoving:boolean = false;
-    private _directionSwitch:boolean;
+    private _isDead:boolean;
 
     //--------------------------------------- for the food aka. Donut
     private currentFoodGridX:number = 7;
@@ -47,9 +47,8 @@ export default class Screen {
 
     get isMoving():boolean                          {return this._isMoving;}
     set isMoving(value:boolean)                     { this._isMoving = value;}
-    
-    get directionSwitch():boolean                   {return this._directionSwitch;}
-    set directionSwitch(value:boolean)              { this._directionSwitch = value;}
+
+    get isDead():boolean                          {return this._isDead;}
 
     //CONSTRUCTOR
     constructor(assetManager:AssetManager, stage:createjs.StageGL) {
@@ -58,36 +57,61 @@ export default class Screen {
         this.stage = stage;
         this.screen = new createjs.Container();
 
-        //construct snake default visual
-
+        //construct sprite objects
         //---------------------- the head
         this._snakeHead = assetManager.getSprite("gameObjectSsprites");
-        this._snakeHead.gotoAndStop("Alive_Head_Right");
-        this._snakeHead.name = "Alive Head";
-        this._snakeHead.regX = this._snakeHead.getBounds().width/2;
-        this._snakeHead.regY = this._snakeHead.getBounds().height/2;
-        this.screen.addChild(this._snakeHead);
-
         //---------------------- the body        
         for (let i:number = 0; i < this._snakeLength; i++)
         {
             this._snakeBody[i] = assetManager.getSprite("gameObjectSsprites");
+        }
+        //---------------------- the tail
+        this._snakeTail = assetManager.getSprite("gameObjectSsprites");
+        //construct food visual
+        this._food = assetManager.getSprite("gameObjectSsprites");
+
+        //snake direction
+        this._direction = ["left", "right", "up", "down"];
+    }
+
+    //PUBLIC METHODS
+    //-------------- to start a new game
+    public start():void {
+
+        // construct snake visual
+        //------------- the head
+        this._snakeHead.gotoAndStop("Alive_Head_Right");
+        this._snakeHead.name = "Alive Head";
+        this._snakeHead.regX = this._snakeHead.getBounds().width/2;
+        this._snakeHead.regY = this._snakeHead.getBounds().height/2;
+        this._snakeHead.scaleX = 1;
+        this.screen.addChild(this._snakeHead);
+        //------------- the body        
+        for (let i:number = 0; i < this._snakeLength; i++)
+        {
             this._snakeBody[i].gotoAndStop("Alive_Body");
             this._snakeBody[i].regX = this._snakeBody[i].getBounds().width/2;
             this._snakeBody[i].regY = this._snakeBody[i].getBounds().height/2;
         }
-
-        //---------------------- the tail
-        this._snakeTail = assetManager.getSprite("gameObjectSsprites");
+        this.screen.addChild(this._snakeBody[0]);
+        //------------- the tail  
         this._snakeTail.gotoAndStop("Alive_Tail_Right");
         this._snakeTail.regX = this._snakeTail.getBounds().width/2;
         this._snakeTail.regY = this._snakeTail.getBounds().height/2;
+        this._snakeTail.scaleX = 1;
         this.screen.addChild(this._snakeTail);
-
-        //snake direction
-        this._direction = ["left", "right", "up", "down"];
-
+        
+        // food visual
+        this._food.gotoAndStop("Donut");
+        this._food.name = "Donut";
+        this._food.regX = this._food.getBounds().width/2;
+        this._food.regY = this._food.getBounds().height/2;
+        this.currentFoodGridX = 7;
+        this.currentFoodGridY = 7;        
+        this.screen.addChild(this._food);
+        
         //snake travel log initialization
+        this.travelLog = [[],[]];
         //----------------------- head
         this.travelLog[0][0] = 3;
         this.travelLog[0][1] = 7;
@@ -96,28 +120,16 @@ export default class Screen {
         this.travelLog[1][1] = 7;
         //----------------------- tail
         this.travelLog.push([1,7]);
-        
-        //construct food visual
-        this._food = assetManager.getSprite("gameObjectSsprites");
-        this._food.gotoAndStop("Donut");
-        this._food.name = "Donut";
-        this._food.regX = this._food.getBounds().width/2;
-        this._food.regY = this._food.getBounds().height/2;
-        this.currentFoodGridX = 7;
-        this.currentFoodGridY = 7;
 
-        this.screen.addChild(this._food);
-    }
-
-    //PUBLIC METHODS
-    //-------------- to start a new game
-    public start():void {
         //initiate snake position and sprite
         this.populateGrid();
         this.currentGridX = 3;
         this.currentGridY = 7;
         this._snakeLength = 1;
-
+        this._currentDirection = this._direction[1];
+        this._isDead = false;
+        this._isMoving = false;
+        
         //draw default game objects with default value
         //--------------------------------------------- food position
         this._food.x = this.gridX[7];
@@ -128,7 +140,6 @@ export default class Screen {
         //--------------------------------------------- snake body position
         this._snakeBody[0].x = this.gridX[2];
         this._snakeBody[0].y = this.gridY[7];
-        this.screen.addChild(this._snakeBody[0]);
         //--------------------------------------------- snake tail position
         this._snakeTail.x = this.gridX[1];
         this._snakeTail.y = this.gridY[7];
@@ -138,37 +149,14 @@ export default class Screen {
 
     //-------------- to stop a game
     public terminate():void {
-        //reset snake postion and sprite
-        this._snakeHead.gotoAndStop("Alive_Head_Right");
-        this._snakeHead.x = this.gridX[3];
-        this._snakeHead.y = this.gridY[7];
-        this._snakeHead.scaleX = 1;
-
-        this._snakeBody[0].gotoAndStop("Alive_Body");
-        this._snakeBody[0].x = this.gridX[2];
-        this._snakeBody[0].y = this.gridY[7];
-
-        this._snakeTail.gotoAndStop("Alive_Tail_Right");
-        this._snakeTail.x = this.gridX[1];
-        this._snakeTail.y = this.gridY[7];
 
         for (let i:number = 0; i < this._snakeLength; i++)
         {
-            //this.stage.removeChild(this.snakeBody[i]);
-            this._snakeBody[i].x = this.gridX[2];
-            this._snakeBody[i].y = this.gridY[7];
-            this.travelLog.pop();
-
-            this.screen.removeChild(this._snakeBody[i]);
             this.screen.removeChild(this._snakeBody[i]);
         }
-        this.travelLog.push([1,7]);
-        
+        this.screen.removeChild(this._snakeHead);
+        this.screen.removeChild(this._snakeTail);
         this.stage.removeChild(this.screen);
-        
-        //current score reset
-        this._snakeLength = 1;
-        this._isMoving = false;
     }
 
     //PRIVATE METHODS
@@ -232,6 +220,50 @@ export default class Screen {
             //snake tail will always be in the last element of the array
             this._snakeTail.x = this.gridX[this.travelLog[this.travelLog.length - 1][0]];
             this._snakeTail.y = this.gridY[this.travelLog[this.travelLog.length - 1][1]];
+
+            //rotate the tail accordingly to the body
+            //by comparing the last travellog element and the next to it
+            if      (this.travelLog[this.travelLog.length - 1][0] <  this.travelLog[this.travelLog.length - 2][0] &&
+                     this.travelLog[this.travelLog.length - 1][1] == this.travelLog[this.travelLog.length - 2][1] )
+            {
+                this._snakeTail.gotoAndStop("Alive_Tail_Right");
+                this._snakeTail.scaleX = 1;
+            }
+
+            else if (this.travelLog[this.travelLog.length - 1][0] >  this.travelLog[this.travelLog.length - 2][0] &&
+                     this.travelLog[this.travelLog.length - 1][1] == this.travelLog[this.travelLog.length - 2][1] )
+            {
+                this._snakeTail.gotoAndStop("Alive_Tail_Right");
+                this._snakeTail.scaleX = -1;
+            }
+            else if (this.travelLog[this.travelLog.length - 1][0] == this.travelLog[this.travelLog.length - 2][0] &&
+                     this.travelLog[this.travelLog.length - 1][1] <  this.travelLog[this.travelLog.length - 2][1] )
+            {
+                this._snakeTail.gotoAndStop("Alive_Tail_Down");
+                this._snakeTail.scaleX = 1;
+            }
+
+            else if (this.travelLog[this.travelLog.length - 1][0] == this.travelLog[this.travelLog.length - 2][0] &&
+                     this.travelLog[this.travelLog.length - 1][1] > this.travelLog[this.travelLog.length - 2][1] )
+            {
+                this._snakeTail.gotoAndStop("Alive_Tail_Up");
+                this._snakeTail.scaleX = 1;
+            }
+        }
+    }
+
+    private SnakeCollisionMonitor()
+    {
+        //Stop moving when snake head collides with its own tail
+        //in short the travel log has dupplicate entries 
+        for (let i:number = 1; i < this.travelLog.length; i++)
+        {
+            if (this.travelLog[0][0] == this.travelLog[i][0] &&
+                this.travelLog[0][1] == this.travelLog[i][1] )
+                {
+                    this._isMoving = false;
+                    this._isDead = true;
+                }
         }
     }
 
@@ -258,8 +290,10 @@ export default class Screen {
 
                 if (this._snakeHead.x <= this.gridX[0])
                 {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
+                
                 break;
     
             case this._direction[1]:
@@ -277,10 +311,12 @@ export default class Screen {
                 this._snakeHead.x += this._snakeSpeed;
                 this._snakeHead.scaleX = 1;
 
-                if (this._snakeHead.x  >= this.gridX[16])
+                if (this._snakeHead.x >= this.gridX[16])
                 {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
+                
                 break;
     
             case this._direction[2]:
@@ -299,8 +335,10 @@ export default class Screen {
 
                 if (this._snakeHead.y <= this.gridY[0])
                 {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
+                
                 break;
     
             case this._direction[3]:
@@ -319,8 +357,10 @@ export default class Screen {
 
                 if (this._snakeHead.y >= this.gridY[14])
                 {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
+                
                 break;
         }
     }
@@ -357,8 +397,8 @@ export default class Screen {
 
             while
                 (
-                    this.currentFoodGridX == this.currentGridX &&
-                    this.currentFoodGridY == this.currentGridY &&
+                    // this.currentFoodGridX == this.currentGridX &&
+                    // this.currentFoodGridY == this.currentGridY &&
                     this.travelLog.includes([this.currentFoodGridX,this.currentFoodGridY])
                 )
 
@@ -371,12 +411,17 @@ export default class Screen {
 
     public Update() {
 
-        if (this._isMoving)
+        if (this._isMoving && !this._isDead)
         {
             this.FoodMonitor();
             this.TravelLogMonitor();
             this.SnakeController();
+            this.SnakeCollisionMonitor();
             //console.log(`snake nodeX: ${this.currentGridX}, nodeY: ${this.currentGridY}`);            
+        }
+        if (this._isDead)
+        {
+            
         }
     }
 }

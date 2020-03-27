@@ -29,6 +29,7 @@ let upkey: boolean = false;
 let leftkey: boolean = false;
 let rightkey: boolean = false;
 let keyDownCount :number = 0;
+// window.focus();
 
 // --------------------------------------------------- private methods
 function monitorKeys():void {
@@ -46,10 +47,8 @@ function monitorKeys():void {
     } else if (downkey){
 
         keyDownCount++;
-
     }
 }
-
 
 // --------------------------------------------------- event handlers
 function onReady(e:createjs.Event):void {
@@ -76,12 +75,12 @@ function onReady(e:createjs.Event):void {
     stage.on("gameplay", onShowGameplay);
 
     stage.on("introNext", onShowGameplay);
-    stage.on("gameplayNext", onShowEnd);
-    stage.on("endNext", onShowIntro);
+    //stage.on("gameplayNext", onShowEnd);
+    //stage.on("endNext", onShowIntro);
 
-    stage.on("introPrevious", onShowEnd);
-    stage.on("gameplayPrevious", onShowIntro);
-    stage.on("endPrevious", onShowGameplay);
+    //stage.on("introPrevious", onShowEnd);
+    //stage.on("gameplayPrevious", onShowIntro);
+    //stage.on("endPrevious", onShowGameplay);
     
     //wire up eventListener for keyboard keys
     document.onkeydown = onKeyDown;
@@ -125,29 +124,44 @@ function onKeyDown(e:KeyboardEvent):void {
     if (e.keyCode == 37) {
         leftkey = true;
         //console.log("Left key is pressed.");
-        gameplay.currentDirection = gameplay.direction[0];
+        if (gameplay.currentDirection == gameplay.direction[1])
+        {
+            gameplay.currentDirection == gameplay.direction[1]
+        }
+        else gameplay.currentDirection = gameplay.direction[0];
     }
         
     else if (e.keyCode == 39) {
         rightkey = true;
         //console.log("Right key is pressed.");
-        gameplay.currentDirection = gameplay.direction[1];
+        if (gameplay.currentDirection == gameplay.direction[0])
+        {
+            gameplay.currentDirection == gameplay.direction[0]
+        }
+        else gameplay.currentDirection = gameplay.direction[1];
         
     } 
     else if (e.keyCode == 38) {
         upkey = true;
         //console.log("Up key is pressed.");
-        gameplay.currentDirection = gameplay.direction[2];
+        if (gameplay.currentDirection == gameplay.direction[3])
+        {
+            gameplay.currentDirection == gameplay.direction[3]
+        }
+        else gameplay.currentDirection = gameplay.direction[2];
     } 
     else if (e.keyCode == 40) {
         downkey = true;
         //console.log("Down key is pressed.");
-        gameplay.currentDirection = gameplay.direction[3];
+        if (gameplay.currentDirection == gameplay.direction[2])
+        {
+            gameplay.currentDirection == gameplay.direction[2]
+        }
+        else gameplay.currentDirection = gameplay.direction[3];
     }
 
     console.log("Current direction is " + gameplay.currentDirection);
     gameplay.isMoving = true;
-    gameplay.directionSwitch = true;
     //console.log(keyDownCount);
 }
 
@@ -163,8 +177,6 @@ function onKeyUp(e:KeyboardEvent):void {
         //play sound effect
         createjs.Sound.play("keyUpSound");
     }
-
-    gameplay.directionSwitch = false;
 }
 
 function onTick(e:createjs.Event):void {
@@ -178,7 +190,10 @@ function onTick(e:createjs.Event):void {
     monitorKeys();
 
     gameplay.Update();
-    
+    if (gameplay.isDead)
+    {
+       onShowEnd();
+    }    
 
     // update the stage!
     stage.update();
@@ -186,6 +201,7 @@ function onTick(e:createjs.Event):void {
 
 // --------------------------------------------------- main method
 function main():void {
+    window.focus();
     console.log(">> initializing");
 
     // get reference to canvas

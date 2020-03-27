@@ -10203,11 +10203,6 @@ function onReady(e) {
     gameplay = new Gameplay_1.default(assetManager, stage);
     stage.on("gameplay", onShowGameplay);
     stage.on("introNext", onShowGameplay);
-    stage.on("gameplayNext", onShowEnd);
-    stage.on("endNext", onShowIntro);
-    stage.on("introPrevious", onShowEnd);
-    stage.on("gameplayPrevious", onShowIntro);
-    stage.on("endPrevious", onShowGameplay);
     document.onkeydown = onKeyDown;
     document.onkeyup = onKeyUp;
     createjs.Ticker.framerate = Constants_1.FRAME_RATE;
@@ -10236,23 +10231,38 @@ function onShowIntro() {
 function onKeyDown(e) {
     if (e.keyCode == 37) {
         leftkey = true;
-        gameplay.currentDirection = gameplay.direction[0];
+        if (gameplay.currentDirection == gameplay.direction[1]) {
+            gameplay.currentDirection == gameplay.direction[1];
+        }
+        else
+            gameplay.currentDirection = gameplay.direction[0];
     }
     else if (e.keyCode == 39) {
         rightkey = true;
-        gameplay.currentDirection = gameplay.direction[1];
+        if (gameplay.currentDirection == gameplay.direction[0]) {
+            gameplay.currentDirection == gameplay.direction[0];
+        }
+        else
+            gameplay.currentDirection = gameplay.direction[1];
     }
     else if (e.keyCode == 38) {
         upkey = true;
-        gameplay.currentDirection = gameplay.direction[2];
+        if (gameplay.currentDirection == gameplay.direction[3]) {
+            gameplay.currentDirection == gameplay.direction[3];
+        }
+        else
+            gameplay.currentDirection = gameplay.direction[2];
     }
     else if (e.keyCode == 40) {
         downkey = true;
-        gameplay.currentDirection = gameplay.direction[3];
+        if (gameplay.currentDirection == gameplay.direction[2]) {
+            gameplay.currentDirection == gameplay.direction[2];
+        }
+        else
+            gameplay.currentDirection = gameplay.direction[3];
     }
     console.log("Current direction is " + gameplay.currentDirection);
     gameplay.isMoving = true;
-    gameplay.directionSwitch = true;
 }
 function onKeyUp(e) {
     keyDownCount = 0;
@@ -10267,15 +10277,18 @@ function onKeyUp(e) {
     if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40) {
         createjs.Sound.play("keyUpSound");
     }
-    gameplay.directionSwitch = false;
 }
 function onTick(e) {
     document.getElementById("fps").innerHTML = String(createjs.Ticker.getMeasuredFPS());
     monitorKeys();
     gameplay.Update();
+    if (gameplay.isDead) {
+        onShowEnd();
+    }
     stage.update();
 }
 function main() {
+    window.focus();
     console.log(">> initializing");
     canvas = document.getElementById("game-canvas");
     canvas.width = Constants_1.STAGE_WIDTH;
@@ -10324,36 +10337,43 @@ class Screen {
         this._snakeLength = 255;
         this.gridX = [];
         this.gridY = [];
-        this.travelLog = [[], []];
         this._isMoving = false;
         this.currentFoodGridX = 7;
         this.currentFoodGridY = 7;
         this.stage = stage;
         this.screen = new createjs.Container();
         this._snakeHead = assetManager.getSprite("gameObjectSsprites");
+        for (let i = 0; i < this._snakeLength; i++) {
+            this._snakeBody[i] = assetManager.getSprite("gameObjectSsprites");
+        }
+        this._snakeTail = assetManager.getSprite("gameObjectSsprites");
+        this._food = assetManager.getSprite("gameObjectSsprites");
+        this._direction = ["left", "right", "up", "down"];
+    }
+    get currentDirection() { return this._currentDirection; }
+    set currentDirection(value) { this._currentDirection = value; }
+    get direction() { return this._direction; }
+    get isMoving() { return this._isMoving; }
+    set isMoving(value) { this._isMoving = value; }
+    get isDead() { return this._isDead; }
+    start() {
         this._snakeHead.gotoAndStop("Alive_Head_Right");
         this._snakeHead.name = "Alive Head";
         this._snakeHead.regX = this._snakeHead.getBounds().width / 2;
         this._snakeHead.regY = this._snakeHead.getBounds().height / 2;
+        this._snakeHead.scaleX = 1;
         this.screen.addChild(this._snakeHead);
         for (let i = 0; i < this._snakeLength; i++) {
-            this._snakeBody[i] = assetManager.getSprite("gameObjectSsprites");
             this._snakeBody[i].gotoAndStop("Alive_Body");
             this._snakeBody[i].regX = this._snakeBody[i].getBounds().width / 2;
             this._snakeBody[i].regY = this._snakeBody[i].getBounds().height / 2;
         }
-        this._snakeTail = assetManager.getSprite("gameObjectSsprites");
+        this.screen.addChild(this._snakeBody[0]);
         this._snakeTail.gotoAndStop("Alive_Tail_Right");
         this._snakeTail.regX = this._snakeTail.getBounds().width / 2;
         this._snakeTail.regY = this._snakeTail.getBounds().height / 2;
+        this._snakeTail.scaleX = 1;
         this.screen.addChild(this._snakeTail);
-        this._direction = ["left", "right", "up", "down"];
-        this.travelLog[0][0] = 3;
-        this.travelLog[0][1] = 7;
-        this.travelLog[1][0] = 2;
-        this.travelLog[1][1] = 7;
-        this.travelLog.push([1, 7]);
-        this._food = assetManager.getSprite("gameObjectSsprites");
         this._food.gotoAndStop("Donut");
         this._food.name = "Donut";
         this._food.regX = this._food.getBounds().width / 2;
@@ -10361,52 +10381,36 @@ class Screen {
         this.currentFoodGridX = 7;
         this.currentFoodGridY = 7;
         this.screen.addChild(this._food);
-    }
-    get currentDirection() { return this._currentDirection; }
-    set currentDirection(value) { this._currentDirection = value; }
-    get direction() { return this._direction; }
-    get isMoving() { return this._isMoving; }
-    set isMoving(value) { this._isMoving = value; }
-    get directionSwitch() { return this._directionSwitch; }
-    set directionSwitch(value) { this._directionSwitch = value; }
-    start() {
+        this.travelLog = [[], []];
+        this.travelLog[0][0] = 3;
+        this.travelLog[0][1] = 7;
+        this.travelLog[1][0] = 2;
+        this.travelLog[1][1] = 7;
+        this.travelLog.push([1, 7]);
         this.populateGrid();
         this.currentGridX = 3;
         this.currentGridY = 7;
         this._snakeLength = 1;
+        this._currentDirection = this._direction[1];
+        this._isDead = false;
+        this._isMoving = false;
         this._food.x = this.gridX[7];
         this._food.y = this.gridY[7];
         this._snakeHead.x = this.gridX[3];
         this._snakeHead.y = this.gridY[7];
         this._snakeBody[0].x = this.gridX[2];
         this._snakeBody[0].y = this.gridY[7];
-        this.screen.addChild(this._snakeBody[0]);
         this._snakeTail.x = this.gridX[1];
         this._snakeTail.y = this.gridY[7];
         this.stage.addChild(this.screen);
     }
     terminate() {
-        this._snakeHead.gotoAndStop("Alive_Head_Right");
-        this._snakeHead.x = this.gridX[3];
-        this._snakeHead.y = this.gridY[7];
-        this._snakeHead.scaleX = 1;
-        this._snakeBody[0].gotoAndStop("Alive_Body");
-        this._snakeBody[0].x = this.gridX[2];
-        this._snakeBody[0].y = this.gridY[7];
-        this._snakeTail.gotoAndStop("Alive_Tail_Right");
-        this._snakeTail.x = this.gridX[1];
-        this._snakeTail.y = this.gridY[7];
         for (let i = 0; i < this._snakeLength; i++) {
-            this._snakeBody[i].x = this.gridX[2];
-            this._snakeBody[i].y = this.gridY[7];
-            this.travelLog.pop();
-            this.screen.removeChild(this._snakeBody[i]);
             this.screen.removeChild(this._snakeBody[i]);
         }
-        this.travelLog.push([1, 7]);
+        this.screen.removeChild(this._snakeHead);
+        this.screen.removeChild(this._snakeTail);
         this.stage.removeChild(this.screen);
-        this._snakeLength = 1;
-        this._isMoving = false;
     }
     randomMe(low, high) {
         let randomNum = 0;
@@ -10441,6 +10445,35 @@ class Screen {
             }
             this._snakeTail.x = this.gridX[this.travelLog[this.travelLog.length - 1][0]];
             this._snakeTail.y = this.gridY[this.travelLog[this.travelLog.length - 1][1]];
+            if (this.travelLog[this.travelLog.length - 1][0] < this.travelLog[this.travelLog.length - 2][0] &&
+                this.travelLog[this.travelLog.length - 1][1] == this.travelLog[this.travelLog.length - 2][1]) {
+                this._snakeTail.gotoAndStop("Alive_Tail_Right");
+                this._snakeTail.scaleX = 1;
+            }
+            else if (this.travelLog[this.travelLog.length - 1][0] > this.travelLog[this.travelLog.length - 2][0] &&
+                this.travelLog[this.travelLog.length - 1][1] == this.travelLog[this.travelLog.length - 2][1]) {
+                this._snakeTail.gotoAndStop("Alive_Tail_Right");
+                this._snakeTail.scaleX = -1;
+            }
+            else if (this.travelLog[this.travelLog.length - 1][0] == this.travelLog[this.travelLog.length - 2][0] &&
+                this.travelLog[this.travelLog.length - 1][1] < this.travelLog[this.travelLog.length - 2][1]) {
+                this._snakeTail.gotoAndStop("Alive_Tail_Down");
+                this._snakeTail.scaleX = 1;
+            }
+            else if (this.travelLog[this.travelLog.length - 1][0] == this.travelLog[this.travelLog.length - 2][0] &&
+                this.travelLog[this.travelLog.length - 1][1] > this.travelLog[this.travelLog.length - 2][1]) {
+                this._snakeTail.gotoAndStop("Alive_Tail_Up");
+                this._snakeTail.scaleX = 1;
+            }
+        }
+    }
+    SnakeCollisionMonitor() {
+        for (let i = 1; i < this.travelLog.length; i++) {
+            if (this.travelLog[0][0] == this.travelLog[i][0] &&
+                this.travelLog[0][1] == this.travelLog[i][1]) {
+                this._isMoving = false;
+                this._isDead = true;
+            }
         }
     }
     SnakeController() {
@@ -10456,7 +10489,8 @@ class Screen {
                 this._snakeHead.x -= this._snakeSpeed;
                 this._snakeHead.scaleX = -1;
                 if (this._snakeHead.x <= this.gridX[0]) {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
                 break;
             case this._direction[1]:
@@ -10470,7 +10504,8 @@ class Screen {
                 this._snakeHead.x += this._snakeSpeed;
                 this._snakeHead.scaleX = 1;
                 if (this._snakeHead.x >= this.gridX[16]) {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
                 break;
             case this._direction[2]:
@@ -10483,7 +10518,8 @@ class Screen {
                 this._snakeHead.x = this.gridX[this.currentGridX];
                 this._snakeHead.y -= this._snakeSpeed;
                 if (this._snakeHead.y <= this.gridY[0]) {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
                 break;
             case this._direction[3]:
@@ -10496,7 +10532,8 @@ class Screen {
                 this._snakeHead.x = this.gridX[this.currentGridX];
                 this._snakeHead.y += this._snakeSpeed;
                 if (this._snakeHead.y >= this.gridY[14]) {
-                    this.isMoving = false;
+                    this._isMoving = false;
+                    this._isDead = true;
                 }
                 break;
         }
@@ -10515,9 +10552,7 @@ class Screen {
             do {
                 this.currentFoodGridX = this.randomMe(0, this.gridX.length - 1);
                 this.currentFoodGridY = this.randomMe(0, this.gridY.length - 1);
-            } while (this.currentFoodGridX == this.currentGridX &&
-                this.currentFoodGridY == this.currentGridY &&
-                this.travelLog.includes([this.currentFoodGridX, this.currentFoodGridY]));
+            } while (this.travelLog.includes([this.currentFoodGridX, this.currentFoodGridY]));
             this._food.x = this.gridX[this.currentFoodGridX];
             this._food.y = this.gridY[this.currentFoodGridY];
             console.log("food x: " + this.gridX[this.currentFoodGridX]);
@@ -10525,10 +10560,13 @@ class Screen {
         }
     }
     Update() {
-        if (this._isMoving) {
+        if (this._isMoving && !this._isDead) {
             this.FoodMonitor();
             this.TravelLogMonitor();
             this.SnakeController();
+            this.SnakeCollisionMonitor();
+        }
+        if (this._isDead) {
         }
     }
 }
@@ -10577,6 +10615,7 @@ const Constants_1 = __webpack_require__(/*! ./Constants */ "./src/Constants.ts")
 class IntroScreen extends Screen_1.default {
     constructor(assetManager, stage) {
         super(assetManager, stage, "intro");
+        super.addNextButton();
     }
     showMe() {
         super.drawUIDonut(20, 20);
@@ -10623,14 +10662,12 @@ class Screen {
         this.uiDonut = assetManager.getSprite("gameObjectSsprites");
         this.uiCup = assetManager.getSprite("gameUI");
         let btnPrevious = assetManager.getSprite("sprites", "buttons/previousUp", 10, 575);
-        this.screen.addChild(btnPrevious);
-        let btnNext = assetManager.getSprite("sprites", "buttons/nextUp", 550, 575);
-        this.screen.addChild(btnNext);
+        this.btnNext = assetManager.getSprite("sprites", "buttons/nextUp", 550, 575);
         let hitAreaSprite = assetManager.getSprite("sprites", "buttons/hotspot");
-        let nextButtonHelper = new createjs.ButtonHelper(btnNext, "buttons/nextUp", "buttons/nextOver", "buttons/nextOver", false, hitAreaSprite, "buttons/hotspot");
+        let nextButtonHelper = new createjs.ButtonHelper(this.btnNext, "buttons/nextUp", "buttons/nextOver", "buttons/nextOver", false, hitAreaSprite, "buttons/hotspot");
         let nextButtonHelper2 = new createjs.ButtonHelper(btnPrevious, "buttons/previousUp", "buttons/previousOver", "buttons/previousOver", false, hitAreaSprite, "buttons/hotspot");
         this.btnReplay.on("click", this.onGameplay, this);
-        btnNext.on("click", this.onNext, this);
+        this.btnNext.on("click", this.onNext, this);
         btnPrevious.on("click", this.onPrevious, this);
         this.eventNext = new createjs.Event(`${type}Next`, true, false);
         this.eventPrevious = new createjs.Event(`${type}Previous`, true, false);
@@ -10691,6 +10728,12 @@ class Screen {
         this.uiCup.x = x;
         this.uiCup.y = y;
         this.screen.addChild(this.uiCup);
+    }
+    addNextButton() {
+        this.screen.addChild(this.btnNext);
+    }
+    removeNextButton() {
+        this.screen.removeChild(this.btnNext);
     }
 }
 exports.default = Screen;

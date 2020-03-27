@@ -13,6 +13,7 @@ export default class Screen {
     protected bodyText:createjs.BitmapText;
     protected uiDonut:createjs.Sprite;
     protected uiCup:createjs.Sprite;
+    protected btnNext:createjs.Sprite;
 
     //custom event
     protected eventNext:createjs.Event;
@@ -58,30 +59,23 @@ export default class Screen {
         //draw a UI cup
         this.uiCup = assetManager.getSprite("gameUI")
 
-
-
-
-
-
-
-
         //add previous button to this screen
         let btnPrevious:createjs.Sprite = assetManager.getSprite("sprites", "buttons/previousUp", 10, 575);
-        this.screen.addChild(btnPrevious);
+        //this.screen.addChild(btnPrevious);
 
         //add next button to this screen
-        let btnNext:createjs.Sprite = assetManager.getSprite("sprites", "buttons/nextUp", 550, 575);
-        this.screen.addChild(btnNext);
+        this.btnNext = assetManager.getSprite("sprites", "buttons/nextUp", 550, 575);
+        //this.screen.addChild(this.btnNext);
 
         //set up button helper to make btnNext & btnPrevious behave like a button
         let hitAreaSprite:createjs.Sprite = assetManager.getSprite("sprites", "buttons/hotspot");
-        let nextButtonHelper:createjs.ButtonHelper = new createjs.ButtonHelper(btnNext,"buttons/nextUp", "buttons/nextOver", "buttons/nextOver",false, hitAreaSprite, "buttons/hotspot");
+        let nextButtonHelper:createjs.ButtonHelper = new createjs.ButtonHelper(this.btnNext,"buttons/nextUp", "buttons/nextOver", "buttons/nextOver",false, hitAreaSprite, "buttons/hotspot");
         let nextButtonHelper2:createjs.ButtonHelper = new createjs.ButtonHelper(btnPrevious,"buttons/previousUp", "buttons/previousOver", "buttons/previousOver",false, hitAreaSprite, "buttons/hotspot");
 
         //set up event listener for replay button
         this.btnReplay.on("click", this.onGameplay, this);
 
-        btnNext.on("click", this.onNext, this); // => arrow function could solve this as well, scoping problem
+        this.btnNext.on("click", this.onNext, this); // => arrow function could solve this as well, scoping problem
         btnPrevious.on("click", this.onPrevious, this);
 
         //construct custom events
@@ -162,5 +156,13 @@ export default class Screen {
         this.uiCup.x = x;
         this.uiCup.y = y;
         this.screen.addChild(this.uiCup);
+    }
+
+    public addNextButton():void {
+        this.screen.addChild(this.btnNext);
+    }
+
+    public removeNextButton():void {
+        this.screen.removeChild(this.btnNext);
     }
 }
