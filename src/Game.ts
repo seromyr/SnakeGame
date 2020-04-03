@@ -22,35 +22,30 @@ let gameplayScreen:GameplayScreen;
 let endScreen:EndScreen;
 let gameplay:Gameplay;
 
-//keyboard input variables
+//score bitmap text
+let scoreCurrent:createjs.BitmapText;
+let scoreHighest:createjs.BitmapText;
+let hiScore:number;
 
+//keyboard input variables
 let downkey: boolean = false;
 let upkey: boolean = false;
 let leftkey: boolean = false;
 let rightkey: boolean = false;
 let keyDownCount :number = 0;
-// window.focus();
 
-// --------------------------------------------------- private methods
+//let browser focus on gameplay canvas after loading
+window.focus();
+
+// --------------------------------------------------- keyboard input monitor
 function monitorKeys():void {
-    if (leftkey) {
-        keyDownCount++;
-
-    } else if (rightkey){
-
-        keyDownCount++;
-
-    } else if (upkey){
-
-        keyDownCount++;
-
-    } else if (downkey){
-
-        keyDownCount++;
-    }
+    if      (leftkey)  keyDownCount++;
+    else if (rightkey) keyDownCount++;
+    else if (upkey)    keyDownCount++;
+    else if (downkey)  keyDownCount++;
 }
 
-// --------------------------------------------------- event handlers
+// --------------------------------------------------- game constructor
 function onReady(e:createjs.Event):void {
     console.log(">> adding sprites to game");
 
@@ -61,30 +56,37 @@ function onReady(e:createjs.Event):void {
     leftkey = false;
 
     // construct game object sprites
-    // ...
-
     introScreen = new IntroScreen(assetManager, stage);
-    introScreen.showMe();
-
     gameplayScreen = new GameplayScreen(assetManager, stage);
     endScreen = new EndScreen(assetManager, stage);
+
+    scoreCurrent = new createjs.BitmapText(" ", assetManager.getSpriteSheet("fontCalibri"));
+    scoreHighest = new createjs.BitmapText(" ", assetManager.getSpriteSheet("fontCalibri"));
+    hiScore = 0;
+
+    // intro screen is displayed by default
+    introScreen.showMe();
     
     gameplay = new Gameplay(assetManager, stage);
 
-
+    // keyboard input monitors
+    stage.on("click", onShowGameplay, null, true);
     stage.on("gameplay", onShowGameplay);
-
-    stage.on("introNext", onShowGameplay);
-    //stage.on("gameplayNext", onShowEnd);
-    //stage.on("endNext", onShowIntro);
-
-    //stage.on("introPrevious", onShowEnd);
-    //stage.on("gameplayPrevious", onShowIntro);
-    //stage.on("endPrevious", onShowGameplay);
     
-    //wire up eventListener for keyboard keys
-    document.onkeydown = onKeyDown;
-    document.onkeyup = onKeyUp;
+    //intro screen appears only once
+    stage.on("introNext", onShowGameplay, null, true);
+
+    //wire up eventListener for keyboard keys to start game
+    document.onkeydown = (e:KeyboardEvent) => {
+        if (e.keyCode == 32 ||
+            e.keyCode == 13 ||
+            e.keyCode == 37 ||
+            e.keyCode == 38 ||
+            e.keyCode == 39 ||
+            e.keyCode == 40) {
+            onShowGameplay();
+        }
+    };
 
     // startup the ticker
     createjs.Ticker.framerate = FRAME_RATE;
@@ -93,68 +95,63 @@ function onReady(e:createjs.Event):void {
 }
 
 function onShowGameplay():void {
-    console.log("intro screen next button has been clicked");
     introScreen.hideMe();
     gameplayScreen.showMe();
     endScreen.hideMe();
 
+    //wire up eventListener for keyboard keys only on gameplay screen
+    document.onkeydown = onKeyDown;
+    document.onkeyup = onKeyUp;
     gameplay.start();
-    
 }
 
 function onShowEnd():void {
-    console.log("content screen next button has been clicked");
     gameplayScreen.hideMe();
     endScreen.showMe();
-
-    gameplay.terminate();
-}
-
-function onShowIntro():void {
-    console.log("end screen next button has been clicked");
-    endScreen.hideMe();
-    introScreen.showMe();
+    
+    
+    writeScore(232,252, (gameplay.score).toString());
+    writeHiScore(362,252, hiScore.toString());
+    //remove keyboard event listener
+    document.onkeydown = null;
+    document.onkeyup = null;
 
     gameplay.terminate();
 }
 
 function onKeyDown(e:KeyboardEvent):void {
-
     // which key is pressed?
-    if (e.keyCode == 37) {
+    if (e.keyCode == 37 || e.keyCode == 65) {
         leftkey = true;
         //console.log("Left key is pressed.");
-        if (gameplay.currentDirection == gameplay.direction[1])
-        {
+        if (gameplay.currentDirection == gameplay.direction[1]) {
             gameplay.currentDirection == gameplay.direction[1]
         }
         else gameplay.currentDirection = gameplay.direction[0];
     }
         
-    else if (e.keyCode == 39) {
+    else if (e.keyCode == 39 || e.keyCode == 68) {
         rightkey = true;
         //console.log("Right key is pressed.");
-        if (gameplay.currentDirection == gameplay.direction[0])
-        {
+        if (gameplay.currentDirection == gameplay.direction[0]) {
             gameplay.currentDirection == gameplay.direction[0]
         }
         else gameplay.currentDirection = gameplay.direction[1];
-        
-    } 
-    else if (e.keyCode == 38) {
+    }
+
+    else if (e.keyCode == 38 || e.keyCode == 87) {
         upkey = true;
         //console.log("Up key is pressed.");
-        if (gameplay.currentDirection == gameplay.direction[3])
-        {
+        if (gameplay.currentDirection == gameplay.direction[3]) {
             gameplay.currentDirection == gameplay.direction[3]
         }
         else gameplay.currentDirection = gameplay.direction[2];
-    } 
-    else if (e.keyCode == 40) {
+    }
+
+    else if (e.keyCode == 40 || e.keyCode == 83) {
         downkey = true;
         //console.log("Down key is pressed.");
-        if (gameplay.currentDirection == gameplay.direction[2])
-        {
+        if (gameplay.currentDirection == gameplay.direction[2]) {
             gameplay.currentDirection == gameplay.direction[2]
         }
         else gameplay.currentDirection = gameplay.direction[3];
@@ -162,18 +159,20 @@ function onKeyDown(e:KeyboardEvent):void {
 
     console.log("Current direction is " + gameplay.currentDirection);
     gameplay.isMoving = true;
-    //console.log(keyDownCount);
 }
 
 function onKeyUp(e:KeyboardEvent):void {
     keyDownCount = 0;
 
-    if (e.keyCode == 37) leftkey = false;
+    if      (e.keyCode == 37) leftkey  = false;
     else if (e.keyCode == 39) rightkey = false;
-    else if (e.keyCode == 38) upkey = false;
-    else if (e.keyCode == 40) downkey = false;
+    else if (e.keyCode == 38) upkey    = false;
+    else if (e.keyCode == 40) downkey  = false;
 
-    if (e.keyCode == 37 || e.keyCode == 38 ||e.keyCode == 39 ||e.keyCode == 40) {
+    if (e.keyCode == 37 ||
+        e.keyCode == 38 ||
+        e.keyCode == 39 ||
+        e.keyCode == 40) {
         //play sound effect
         createjs.Sound.play("keyUpSound");
     }
@@ -184,19 +183,48 @@ function onTick(e:createjs.Event):void {
     document.getElementById("fps").innerHTML = String(createjs.Ticker.getMeasuredFPS());
 
     // the official game loop here
-    // ...
-
-    //Monitor keys
+    // monitoring key input
     monitorKeys();
 
     gameplay.Update();
-    if (gameplay.isDead)
+    writeScore(64,24, (gameplay.score).toString());
+
+    if (gameplay.showHiScore)
+        {
+            writeHiScore(192,24, hiScore.toString());
+        }
+
+    if (hiScore < gameplay.score)
+    {
+        hiScore =  gameplay.score;
+    }
+
+    if (gameplay.gameOver)
     {
        onShowEnd();
     }    
 
     // update the stage!
     stage.update();
+}
+
+// get score from gameplay
+function writeScore(x:number, y:number, message:string):void {
+    scoreCurrent.text = message;
+    scoreCurrent.letterSpacing = 1;
+    scoreCurrent.lineHeight = 32;
+    scoreCurrent.x = x;
+    scoreCurrent.y = y;
+    stage.addChild(scoreCurrent);
+}
+
+function writeHiScore(x:number, y:number, message:string):void {
+    scoreHighest.text = message;
+    scoreHighest.letterSpacing = 1;
+    scoreHighest.lineHeight = 32;
+    scoreHighest.x = x;
+    scoreHighest.y = y;
+    stage.addChild(scoreHighest);
 }
 
 // --------------------------------------------------- main method

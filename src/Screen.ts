@@ -13,11 +13,12 @@ export default class Screen {
     protected bodyText:createjs.BitmapText;
     protected uiDonut:createjs.Sprite;
     protected uiCup:createjs.Sprite;
-    protected btnNext:createjs.Sprite;
+
+    //protected btnNext:createjs.Sprite;
 
     //custom event
-    protected eventNext:createjs.Event;
-    protected eventPrevious:createjs.Event;
+    // protected eventNext:createjs.Event;
+    // protected eventPrevious:createjs.Event;
     protected eventGameplay:createjs.Event;
 
     //------------------------------------ GAME OVER SCREEN
@@ -35,7 +36,7 @@ export default class Screen {
 
         //construct bitmap texts
         this.titleText = new createjs.BitmapText(" ", assetManager.getSpriteSheet("fontImpact"));
-        this.bodyText = new createjs.BitmapText(" ", assetManager.getSpriteSheet("fontCalibri")); 
+        this.bodyText = new createjs.BitmapText(" ", assetManager.getSpriteSheet("fontCalibri"));
 
         //add instructions
         this.instructions = assetManager.getSprite("gameUI", "howToPlay", 168, 150);
@@ -61,41 +62,43 @@ export default class Screen {
 
         //add previous button to this screen
         let btnPrevious:createjs.Sprite = assetManager.getSprite("sprites", "buttons/previousUp", 10, 575);
+
+        
         //this.screen.addChild(btnPrevious);
 
         //add next button to this screen
-        this.btnNext = assetManager.getSprite("sprites", "buttons/nextUp", 550, 575);
+        // this.btnNext = assetManager.getSprite("sprites", "buttons/nextUp", 550, 575);
         //this.screen.addChild(this.btnNext);
 
         //set up button helper to make btnNext & btnPrevious behave like a button
-        let hitAreaSprite:createjs.Sprite = assetManager.getSprite("sprites", "buttons/hotspot");
-        let nextButtonHelper:createjs.ButtonHelper = new createjs.ButtonHelper(this.btnNext,"buttons/nextUp", "buttons/nextOver", "buttons/nextOver",false, hitAreaSprite, "buttons/hotspot");
-        let nextButtonHelper2:createjs.ButtonHelper = new createjs.ButtonHelper(btnPrevious,"buttons/previousUp", "buttons/previousOver", "buttons/previousOver",false, hitAreaSprite, "buttons/hotspot");
+        // let hitAreaSprite:createjs.Sprite = assetManager.getSprite("sprites", "buttons/hotspot");
+        // let nextButtonHelper:createjs.ButtonHelper = new createjs.ButtonHelper(this.btnNext,"buttons/nextUp", "buttons/nextOver", "buttons/nextOver",false, hitAreaSprite, "buttons/hotspot");
+        // let nextButtonHelper2:createjs.ButtonHelper = new createjs.ButtonHelper(btnPrevious,"buttons/previousUp", "buttons/previousOver", "buttons/previousOver",false, hitAreaSprite, "buttons/hotspot");
 
         //set up event listener for replay button
         this.btnReplay.on("click", this.onGameplay, this);
 
-        this.btnNext.on("click", this.onNext, this); // => arrow function could solve this as well, scoping problem
-        btnPrevious.on("click", this.onPrevious, this);
+        // this.btnNext.on("click", this.onNext, this); // => arrow function could solve this as well, scoping problem
+        // btnPrevious.on("click", this.onPrevious, this);
 
         //construct custom events
-        this.eventNext = new createjs.Event(`${type}Next`, true, false);
-        this.eventPrevious = new createjs.Event(`${type}Previous`, true, false);
+        //this.eventNext = new createjs.Event(`${type}Next`, true, false);
+        //this.eventPrevious = new createjs.Event(`${type}Previous`, true, false);
         this.eventGameplay = new createjs.Event("gameplay", true, false);
     }
     
     //-------------------------------------- event handlers
-    private onNext(e:createjs.Event):void {
-        console.log("next clicked");
+    // private onNext(e:createjs.Event):void {
+    //     console.log("next clicked");
 
-        //announce to the world that the next button has been clicked
-        this.stage.dispatchEvent(this.eventNext);
-    }
+    //     //announce to the world that the next button has been clicked
+    //     this.stage.dispatchEvent(this.eventNext);
+    // }
     
-    private onPrevious(e:createjs.Event):void {
-        console.log("previous clicked");
-        this.stage.dispatchEvent(this.eventPrevious);
-    }
+    // private onPrevious(e:createjs.Event):void {
+    //     console.log("previous clicked");
+    //     this.stage.dispatchEvent(this.eventPrevious);
+    // }
     
     private onGameplay(e:createjs.Event):void {
         console.log("replay clicked");
@@ -141,16 +144,14 @@ export default class Screen {
     }
 
     public drawUIDonut(x:number,y:number):void {
-
-        this.uiDonut.gotoAndStop("Donut");
+        this.uiDonut.gotoAndStop("Donut_00");
         this.uiDonut.name = "Red Donut";
         this.uiDonut.x = x;
         this.uiDonut.y = y;
         this.screen.addChild(this.uiDonut);
     }
 
-    public drawUICup(x:number,y:number):void {
-
+    public drawUICup(x:number, y:number):void {
         this.uiCup.gotoAndStop("hiScore");
         this.uiCup.name = "hiScore";
         this.uiCup.x = x;
@@ -158,11 +159,13 @@ export default class Screen {
         this.screen.addChild(this.uiCup);
     }
 
-    public addNextButton():void {
-        this.screen.addChild(this.btnNext);
-    }
 
-    public removeNextButton():void {
-        this.screen.removeChild(this.btnNext);
-    }
+
+    // public addNextButton():void {
+    //     this.screen.addChild(this.btnNext);
+    // }
+
+    // public removeNextButton():void {
+    //     this.screen.removeChild(this.btnNext);
+    // }
 }

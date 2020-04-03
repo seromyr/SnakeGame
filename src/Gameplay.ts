@@ -15,25 +15,30 @@ export default class Screen {
     private _snakeBody:createjs.Sprite[] = [];
     private _snakeTail:createjs.Sprite;
     private _food:createjs.Sprite;
+    private _foodOverlay:createjs.Sprite;
     private _hazard:createjs.Sprite;
 
     //gameplay variables   
     //------------------------------- private
     //--------------------------------------- for the snake head only
     private _snakeSpeed = 8;
-    private _snakeLength = 255;
+    private _snakeMaxLength = 255;
+    private _snakeLength = 1;
     private _direction:string[];
     private _currentDirection:string;
-    private score:number;
+    private _scoreHighest:number;
     private gridX:number[] = [];
     private gridY:number[] = [];
     private currentGridX:number;
     private currentGridY:number;
+    private timer:number;
+    private _isDead:boolean;
+    private _gameOver:boolean = false;
+    private _showHiScore:boolean = false;
     
     //--------------------------------------- for the whole snake
     private travelLog:number[][];
     private _isMoving:boolean = false;
-    private _isDead:boolean;
 
     //--------------------------------------- for the food aka. Donut
     private currentFoodGridX:number = 7;
@@ -41,14 +46,17 @@ export default class Screen {
 
     //encapsulation of important variables
     get currentDirection():string                   {return this._currentDirection;}
-    set currentDirection(value:string)              { this._currentDirection = value;}
+    set currentDirection(value:string)              {this._currentDirection = value;}
 
     get direction():string[]                        {return this._direction;}
 
     get isMoving():boolean                          {return this._isMoving;}
-    set isMoving(value:boolean)                     { this._isMoving = value;}
+    set isMoving(value:boolean)                     {this._isMoving = value;}
 
-    get isDead():boolean                          {return this._isDead;}
+    get gameOver():boolean                          {return this._gameOver;}
+    get showHiScore():boolean                        {return this._showHiScore;}
+
+    get score():number {return this._snakeLength - 1;}
 
     //CONSTRUCTOR
     constructor(assetManager:AssetManager, stage:createjs.StageGL) {
@@ -60,8 +68,8 @@ export default class Screen {
         //construct sprite objects
         //---------------------- the head
         this._snakeHead = assetManager.getSprite("gameObjectSsprites");
-        //---------------------- the body        
-        for (let i:number = 0; i < this._snakeLength; i++)
+        //---------------------- the body
+        for (let i:number = 0; i < 255; i++)
         {
             this._snakeBody[i] = assetManager.getSprite("gameObjectSsprites");
         }
@@ -69,6 +77,7 @@ export default class Screen {
         this._snakeTail = assetManager.getSprite("gameObjectSsprites");
         //construct food visual
         this._food = assetManager.getSprite("gameObjectSsprites");
+        this._foodOverlay = assetManager.getSprite("gameObjectSsprites");
 
         //snake direction
         this._direction = ["left", "right", "up", "down"];
@@ -77,6 +86,8 @@ export default class Screen {
     //PUBLIC METHODS
     //-------------- to start a new game
     public start():void {
+
+        this._gameOver = false;
 
         // construct snake visual
         //------------- the head
@@ -87,7 +98,7 @@ export default class Screen {
         this._snakeHead.scaleX = 1;
         this.screen.addChild(this._snakeHead);
         //------------- the body        
-        for (let i:number = 0; i < this._snakeLength; i++)
+        for (let i:number = 0; i < this._snakeMaxLength; i++)
         {
             this._snakeBody[i].gotoAndStop("Alive_Body");
             this._snakeBody[i].regX = this._snakeBody[i].getBounds().width/2;
@@ -102,13 +113,21 @@ export default class Screen {
         this.screen.addChild(this._snakeTail);
         
         // food visual
-        this._food.gotoAndStop("Donut");
+        this._food.gotoAndStop("Donut_00");
         this._food.name = "Donut";
         this._food.regX = this._food.getBounds().width/2;
         this._food.regY = this._food.getBounds().height/2;
         this.currentFoodGridX = 7;
         this.currentFoodGridY = 7;        
         this.screen.addChild(this._food);
+
+        this._foodOverlay.gotoAndPlay("DonutIdle/DonutIdle");
+        this._foodOverlay.name = "Idle";
+        // this._foodOverlay.regX = this._foodOverlay.getBounds().width/2;
+        // this._foodOverlay.regY = this._foodOverlay.getBounds().height/2;
+        this._foodOverlay.regX =  this._food.regX;
+        this._foodOverlay.regY = this._food.regY;
+        this.screen.addChild(this._foodOverlay);
         
         //snake travel log initialization
         this.travelLog = [[],[]];
@@ -134,6 +153,9 @@ export default class Screen {
         //--------------------------------------------- food position
         this._food.x = this.gridX[7];
         this._food.y = this.gridY[7];
+        this._foodOverlay.x = this._food.x;
+        this._foodOverlay.y = this._food.y;
+        
         //--------------------------------------------- snake head position
         this._snakeHead.x = this.gridX[3];
         this._snakeHead.y = this.gridY[7];
@@ -401,12 +423,45 @@ export default class Screen {
                     // this.currentFoodGridY == this.currentGridY &&
                     this.travelLog.includes([this.currentFoodGridX,this.currentFoodGridY])
                 )
-
+            this._food.gotoAndStop(`Donut_0${this.randomMe(0,9)}`);
             this._food.x = this.gridX[this.currentFoodGridX];  
             this._food.y = this.gridY[this.currentFoodGridY];
+            this._foodOverlay.x = this._food.x;
+            this._foodOverlay.y = this._food.y;
             console.log("food x: " + this.gridX[this.currentFoodGridX]);
             console.log("food Y: " + this.gridY[this.currentFoodGridY]);
         }      
+    }
+
+    private SnakeBodyExplosion():void {
+        let countDown:number = this._snakeLength + 1;
+            this.timer = window.setInterval(() => {            
+                countDown--;
+                          
+                this._snakeBody[this._snakeLength - countDown].gotoAndPlay("BodyExplode/BodyExplode");
+                //wait for the explosion animation to end
+                this._snakeBody[this._snakeLength - countDown].on("animationend", function(e:createjs.Event) {
+                    this._snakeBody[this._snakeLength - countDown].stop();
+                    // remove the body part
+                    this.screen.removeChild(this._snakeBody[this._snakeLength - countDown]);
+                }, this, true);
+               
+                // is the timer at 0?
+                if (countDown == 0) {
+                    
+                    //clean up snake tail
+                    this._snakeTail.gotoAndPlay("BodyExplode/BodyExplode");
+                    this._snakeTail.on("animationend", function() {
+                        // clean up
+                        this._snakeTail.stop();
+                        this.screen.removeChild(this._snakeTail);
+                        this._gameOver = true;  
+                        }, this, true);
+
+                    //stop the timer
+                    window.clearInterval(this.timer);                
+                }
+            }, 250);
     }
 
     public Update() {
@@ -417,13 +472,22 @@ export default class Screen {
             this.TravelLogMonitor();
             this.SnakeController();
             this.SnakeCollisionMonitor();
+
             //console.log(`snake nodeX: ${this.currentGridX}, nodeY: ${this.currentGridY}`);            
         }
-        if (this._isDead)
-        {
+        if (this._isDead) {
+            this._isDead = false;
+
+            this._snakeHead.gotoAndPlay("BodyExplode/BodyExplode");
+            this._snakeHead.on("animationend", function() {
+                // clean up snake head
+                this._snakeHead.stop();
+                this.screen.removeChild(this._snakeHead);
+
+            }, this, true);
             
+            this.SnakeBodyExplosion();
+            this._showHiScore = true;
         }
     }
 }
-
-
