@@ -35,6 +35,7 @@ export default class Screen {
     private _isDead:boolean;
     private _gameOver:boolean = false;
     private _showHiScore:boolean = false;
+    public _allowController = true;
     
     //--------------------------------------- for the whole snake
     private travelLog:number[][];
@@ -88,6 +89,7 @@ export default class Screen {
     public start():void {
 
         this._gameOver = false;
+        this._allowController = true;
 
         // construct snake visual
         //------------- the head
@@ -292,98 +294,101 @@ export default class Screen {
     //--------------- to control the snake
     private SnakeController()
     {
-        switch (this._currentDirection) {
-            //move the snake to the corresponding direction
-            //and snap it to the grid
-            case this._direction[0]:
-                this._snakeHead.gotoAndStop("Alive_Head_Right");
-
-                for (let i:number = 0; i < this.gridX.length; i++)
-                {
-                    if (this._snakeHead.x >= this.gridX[i])
-                    {
-                        this.currentGridX = i;
-                    }
-                }
-
-                this._snakeHead.y = this.gridY[this.currentGridY];
-                this._snakeHead.x -= this._snakeSpeed;
-                this._snakeHead.scaleX = -1;
-
-                if (this._snakeHead.x <= this.gridX[0])
-                {
-                    this._isMoving = false;
-                    this._isDead = true;
-                }
-                
-                break;
+        if (this._allowController)
+        {
+            switch (this._currentDirection) {
+                //move the snake to the corresponding direction
+                //and snap it to the grid
+                case this._direction[0]:
+                    this._snakeHead.gotoAndStop("Alive_Head_Right");
     
-            case this._direction[1]:
-                this._snakeHead.gotoAndStop("Alive_Head_Right");
-
-                for (let i:number = 0; i < this.gridX.length; i++)
-                {
-                    if (this._snakeHead.x + 31 >= this.gridX[i])
+                    for (let i:number = 0; i < this.gridX.length; i++)
                     {
-                        this.currentGridX = i;
+                        if (this._snakeHead.x >= this.gridX[i])
+                        {
+                            this.currentGridX = i;
+                        }
                     }
-                }
-
-                this._snakeHead.y = this.gridY[this.currentGridY];
-                this._snakeHead.x += this._snakeSpeed;
-                this._snakeHead.scaleX = 1;
-
-                if (this._snakeHead.x >= this.gridX[16])
-                {
-                    this._isMoving = false;
-                    this._isDead = true;
-                }
-                
-                break;
     
-            case this._direction[2]:
-                this._snakeHead.gotoAndStop("Alive_Head_Up");
-
-                for (let i:number = 0; i < this.gridY.length; i++)
-                {
-                    if (this._snakeHead.y >= this.gridY[i])
-                    {
-                        this.currentGridY = i;
-                    }
-                }
-
-                this._snakeHead.x = this.gridX[this.currentGridX];
-                this._snakeHead.y -= this._snakeSpeed;
-
-                if (this._snakeHead.y <= this.gridY[0])
-                {
-                    this._isMoving = false;
-                    this._isDead = true;
-                }
-                
-                break;
+                    this._snakeHead.y = this.gridY[this.currentGridY];
+                    this._snakeHead.x -= this._snakeSpeed;
+                    this._snakeHead.scaleX = -1;
     
-            case this._direction[3]:
-                this._snakeHead.gotoAndStop("Alive_Head_Down");
-
-                for (let i:number = 0; i < this.gridY.length; i++)
-                {
-                    if (this._snakeHead.y + 31 >= this.gridY[i])
+                    if (this._snakeHead.x <= this.gridX[0])
                     {
-                        this.currentGridY = i;
+                        this._isMoving = false;
+                        this._isDead = true;
                     }
-                }
-
-                this._snakeHead.x = this.gridX[this.currentGridX];
-                this._snakeHead.y += this._snakeSpeed;
-
-                if (this._snakeHead.y >= this.gridY[14])
-                {
-                    this._isMoving = false;
-                    this._isDead = true;
-                }
-                
-                break;
+                    
+                    break;
+        
+                case this._direction[1]:
+                    this._snakeHead.gotoAndStop("Alive_Head_Right");
+    
+                    for (let i:number = 0; i < this.gridX.length; i++)
+                    {
+                        if (this._snakeHead.x + 31 >= this.gridX[i])
+                        {
+                            this.currentGridX = i;
+                        }
+                    }
+    
+                    this._snakeHead.y = this.gridY[this.currentGridY];
+                    this._snakeHead.x += this._snakeSpeed;
+                    this._snakeHead.scaleX = 1;
+    
+                    if (this._snakeHead.x >= this.gridX[16])
+                    {
+                        this._isMoving = false;
+                        this._isDead = true;
+                    }
+                    
+                    break;
+        
+                case this._direction[2]:
+                    this._snakeHead.gotoAndStop("Alive_Head_Up");
+    
+                    for (let i:number = 0; i < this.gridY.length; i++)
+                    {
+                        if (this._snakeHead.y >= this.gridY[i])
+                        {
+                            this.currentGridY = i;
+                        }
+                    }
+    
+                    this._snakeHead.x = this.gridX[this.currentGridX];
+                    this._snakeHead.y -= this._snakeSpeed;
+    
+                    if (this._snakeHead.y <= this.gridY[0])
+                    {
+                        this._isMoving = false;
+                        this._isDead = true;
+                    }
+                    
+                    break;
+        
+                case this._direction[3]:
+                    this._snakeHead.gotoAndStop("Alive_Head_Down");
+    
+                    for (let i:number = 0; i < this.gridY.length; i++)
+                    {
+                        if (this._snakeHead.y + 31 >= this.gridY[i])
+                        {
+                            this.currentGridY = i;
+                        }
+                    }
+    
+                    this._snakeHead.x = this.gridX[this.currentGridX];
+                    this._snakeHead.y += this._snakeSpeed;
+    
+                    if (this._snakeHead.y >= this.gridY[14])
+                    {
+                        this._isMoving = false;
+                        this._isDead = true;
+                    }
+                    
+                    break;
+            }
         }
     }
 
@@ -398,6 +403,7 @@ export default class Screen {
         {
             foodEaten = true;
             console.log("Donut eaten!");
+            createjs.Sound.play("eat");
             this._snakeLength++;
 
             //increase the size of the travel log array at the last index
@@ -411,25 +417,34 @@ export default class Screen {
         //random a new food on the gameplay canvas
         if (foodEaten)
         {
-            do
-            {
+            let dupplicateDonut:boolean = false;
+            let count:number = 0;
+
+           do {
+                dupplicateDonut = false;
                 this.currentFoodGridX = this.randomMe(0, this.gridX.length - 1);
                 this.currentFoodGridY = this.randomMe(0, this.gridY.length - 1);
-            }
 
-            while
-                (
-                    // this.currentFoodGridX == this.currentGridX &&
-                    // this.currentFoodGridY == this.currentGridY &&
-                    this.travelLog.includes([this.currentFoodGridX,this.currentFoodGridY])
-                )
-            this._food.gotoAndStop(`Donut_0${this.randomMe(0,9)}`);
-            this._food.x = this.gridX[this.currentFoodGridX];  
-            this._food.y = this.gridY[this.currentFoodGridY];
-            this._foodOverlay.x = this._food.x;
-            this._foodOverlay.y = this._food.y;
-            console.log("food x: " + this.gridX[this.currentFoodGridX]);
-            console.log("food Y: " + this.gridY[this.currentFoodGridY]);
+                for (let i:number = 0; i < this.travelLog.length; i++) {
+                    if (this.travelLog[i][0] == this.currentFoodGridX &&
+                        this.travelLog[i][1] == this.currentFoodGridY ) {
+                            dupplicateDonut = true;
+                            count++;
+                        }
+                }
+            }  while (dupplicateDonut)
+
+            if (!dupplicateDonut)
+            {
+                console.log(count);
+                this._food.gotoAndStop(`Donut_0${this.randomMe(0,9)}`);
+                this._food.x = this.gridX[this.currentFoodGridX];  
+                this._food.y = this.gridY[this.currentFoodGridY];
+                this._foodOverlay.x = this._food.x;
+                this._foodOverlay.y = this._food.y;
+                console.log("food x: " + this.gridX[this.currentFoodGridX]);
+                console.log("food Y: " + this.gridY[this.currentFoodGridY]);
+            }
         }      
     }
 
@@ -476,8 +491,9 @@ export default class Screen {
             //console.log(`snake nodeX: ${this.currentGridX}, nodeY: ${this.currentGridY}`);            
         }
         if (this._isDead) {
+            this._allowController = false;
             this._isDead = false;
-
+            createjs.Sound.play("hit");
             this._snakeHead.gotoAndPlay("BodyExplode/BodyExplode");
             this._snakeHead.on("animationend", function() {
                 // clean up snake head

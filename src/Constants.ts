@@ -86,22 +86,22 @@ export const ASSET_MANIFEST = [
     },
 
     // game sounds
-    // {
-    //     type:"sound",
-    //     src:"./lib/sounds/eat.wav",
-    //     id:"eat",
-    //     data:4
-    // },
-    // {
-    //     type:"sound",
-    //     src:"./lib/sounds/hit.wav",
-    //     id:"hit",
-    //     data:4
-    // },
-    // {
-    //     type:"sound",
-    //     src:"./lib/sounds/move.wav",
-    //     id:"move",
-    //     data:4
-    // },
+    {
+        type:"sound",
+        src:"./lib/sounds/eat.wav",
+        id:"eat",
+        data:4
+    },
+    {
+        type:"sound",
+        src:"./lib/sounds/hit.wav",
+        id:"hit",
+        data:4
+    },
+    {
+        type:"sound",
+        src:"./lib/sounds/move.wav",
+        id:"move",
+        data:4
+    },
 ];

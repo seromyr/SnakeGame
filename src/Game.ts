@@ -158,6 +158,7 @@ function onKeyDown(e:KeyboardEvent):void {
     }
 
     console.log("Current direction is " + gameplay.currentDirection);
+    
     gameplay.isMoving = true;
 }
 
@@ -168,14 +169,6 @@ function onKeyUp(e:KeyboardEvent):void {
     else if (e.keyCode == 39) rightkey = false;
     else if (e.keyCode == 38) upkey    = false;
     else if (e.keyCode == 40) downkey  = false;
-
-    if (e.keyCode == 37 ||
-        e.keyCode == 38 ||
-        e.keyCode == 39 ||
-        e.keyCode == 40) {
-        //play sound effect
-        createjs.Sound.play("keyUpSound");
-    }
 }
 
 function onTick(e:createjs.Event):void {
@@ -185,6 +178,11 @@ function onTick(e:createjs.Event):void {
     // the official game loop here
     // monitoring key input
     monitorKeys();
+
+    if (keyDownCount == 1 && gameplay._allowController)
+    {
+        createjs.Sound.play("move");
+    }
 
     gameplay.Update();
     writeScore(64,24, (gameplay.score).toString());

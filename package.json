@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --progress",
     "build-watch": "webpack --w --progress",
-    "game": "webpack-dev-server --open --mode development"
+    "game": "webpack-dev-server --open --mode production"
   },
   "author": "Sean Morrow",
   "license": "ISC",
